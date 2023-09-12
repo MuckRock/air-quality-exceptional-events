@@ -70,10 +70,6 @@ for_concetration_plot <- mcmurray_concurrences %>%
   mutate(site_id = substr(gsub("-", "", airs_monitor_id), start = 1, stop = 9)) %>% 
   mutate(concurred = "Y")
   
-  
-  
-  group_by(airs_monitor_id, state, county) %>% 
-  summarize(days = n())
 
 # Impacts Connecticut, Maryland, Massachusetts, New Jersey, Pennsylvania and Rhode Island ozone
 # Impacts Ohio for both Ozone and PM2.5 
