@@ -1,6 +1,8 @@
 # PROJECT SPECIFIC
-data/
-
+# Raw data files include large txt files of hundreds of thousands of air quality readings from EPA
+data/raw
+# Temp files include anything temporary analysis or data that won't make it into findings or reporting 
+temp/
 
 # GENERIC R FILES TO IGNORE
 # History files

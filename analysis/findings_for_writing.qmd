@@ -1,0 +1,317 @@
+---
+title: "Findings for writing"
+format:
+  html:
+    theme: default
+    toc: true
+---
+
+```{r}
+library(tidyverse)
+library(here)
+library(janitor)
+library(readxl)
+library(lubridate)
+library(plotly)
+library(htmltools)
+library(DT)
+library(tidycensus)
+library(censusapi)
+Sys.setenv(CENSUS_KEY="f0c4bf511063de6900e4007c6f8fef68641af8d7")
+```
+
+# 1: Regulators are turning to this still-obscure rule more often to reach air quality goals, primarilymostly because of wildfire
+```{r}
+# LOAD DATA 
+# Summary data supplied by EPA 
+all_events <- read_excel(here("data", "raw", "exceptional_events_1_1_2016_copy_for_MuckRock.xls")) %>% 
+  clean_names()
+# Qualifer codes from EPA website 
+qualifier_dictionary <-  read_csv(here("data", "raw", "qualifiers.csv")) %>% 
+  clean_names() 
+
+```
+
+```{r}
+# EVENTS BY QUALIFIER CODES 
+# Prep data 
+events_by_qualifer_df <- all_events %>% 
+  group_by(qualifier_code) %>% 
+  summarize(count = n()) %>% 
+  inner_join(select(qualifier_dictionary, qualifier_code, qualifier_description), by = "qualifier_code") %>% 
+  arrange(desc(count))
+```
+
+```{r}
+events_by_days_df <- all_events %>%
+  # There are 39 of 699 events that don't have start or end dates
+  # May try to find a solution for this later
+  filter(!is.na(event_begin_date)) %>% 
+  filter(!is.na(event_end_date)) %>% 
+  mutate(event_begin_date = dmy(event_begin_date)) %>% 
+  mutate(event_end_date = dmy(event_end_date)) %>% 
+  # counts the day the event begins 
+  mutate(event_length = 1 + (event_end_date - event_begin_date))
+
+```
+
+```{r}
+days_of_events_submissions_by_year_df <- events_by_days_df %>% 
+  # Removes several outliers that likely aren't true "event demonstrations"
+  filter(event_length < 365) %>% 
+  mutate(year = year(event_begin_date)) %>% 
+  group_by(year, qualifier_code) %>% 
+  summarize(days = sum(event_length)) %>% 
+  inner_join(select(qualifier_dictionary, qualifier_code, qualifier_description), by = "qualifier_code") %>% 
+  select(year, qualifier_description, days)
+```
+
+```{r}
+ggplotly(ggplot(days_of_events_submissions_by_year_df, aes(x = year, y = days, fill = qualifier_description))+geom_bar(stat = "identity") +
+  theme_minimal() +
+  theme(axis.title.x=element_blank(), axis.text.x=element_blank()))
+```
+
+# 2: An even larger number of people - xx million - live in areas where the Environmental Protection Agency has signaled a willingness to ignore pollution exceedances. 
+
+```{r}
+fips <- as.data.frame(fips_codes) %>% 
+  mutate(state_county_fips = paste0(state_code, county_code)) %>%  
+  select(state_name, county, state_county_fips) %>% 
+  rename(state = state_name)
+
+aqs_df <- read_csv(here("data", "raw", "muckrock_request_exclusion_ee.csv")) %>% 
+  clean_names() %>% 
+  mutate(state_county_fips = str_remove(str_sub(airs_monitor_id, 1, 6), pattern= "-")) %>% 
+  mutate(year = year(as_date(sample_date_time))) %>% 
+  left_join(fips, by = "state_county_fips") 
+```
+
+```{r}
+# 74 unique counties 
+unique_counties <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>% 
+  distinct(county, state, state_county_fips) %>% 
+  # Getting rid of CT because they no longer do counties, but will add planning regions back in 
+  filter(!state == "Connecticut") %>% 
+  # Take out Dona Ana cuz of typographical error 
+  filter(!county == "Dona Ana County")
+
+# 20 states 
+unique_states <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>% 
+  distinct(state)
+
+# Connect with Census 2022 data to show how many now live in these counties, since this is a current / future-oriented finding
+pops <- read_csv(here("data", "raw", "census", "2020_2022", "co-est2022-alldata.csv")) 
+
+# Hartford, Fairfield, Lichtfield, Windham are now 
+# Capitol Planning Region, Western Connecticut Planning Region, Northwest Hills Planning Region, Northeastern Connecticut Planning Region
+# Add Doña Ana County in as well cuz of ñ
+ct_nm_pops <- pops %>% 
+  filter(CTYNAME %in% c("Capitol Planning Region", "Western Connecticut Planning Region", "Northwest Hills Planning Region", "Northeastern Connecticut Planning Region","Doña Ana County")) %>% 
+  select(CTYNAME, STNAME, POPESTIMATE2022) %>% 
+  rename(county = CTYNAME) %>% 
+  rename(state = STNAME)
+
+unique_county_pops <- unique_counties %>% 
+  left_join(pops, by = c("state" = "STNAME", "county" = "CTYNAME")) %>% 
+  select(county, state, POPESTIMATE2022) %>% 
+  rbind(ct_nm_pops)
+
+# 35,968,515
+total_pop <- sum(unique_county_pops$POPESTIMATE2022)
+
+
+```
+# 3: The number of total demonstrations and days for wildfires compared to total
+```{r}
+# EPA has concurred on a total of 139 unique exceptional event IDs 
+total_concurred_demos <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>% 
+  distinct(exceptional_event_id)
+
+# If you calculate unique concurred days by type, it seems like there are more unique High Wind days than Wildfire 
+# This would be misleading though because wildfire days affect multiple counties usually, and high winds are more concentrated
+concurred_days_by_type <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>%
+  mutate(date = as_date(sample_date_time)) %>% 
+  group_by(event_type_description) %>% 
+  summarize(days = n_distinct(date))
+  
+# This seperates our data in to county and type, so days overlap across counties, but it more accurately reflects the impact of event types, ie one fire affects air in several counties 
+concurred_county_days_by_type <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>%
+  mutate(date = as_date(sample_date_time)) %>% 
+  group_by(event_type_description, state_county_fips) %>% 
+  summarize(days = n_distinct(date))
+
+# 236 days of wildfires were erased from air
+county_days_by_event_type <- concurred_days_by_type %>% 
+  group_by(event_type_description) %>% 
+  summarize(days = sum(days))
+
+# This is also important ... High winds only affects 5 counties 
+counties_by_event_type <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>%
+  group_by(event_type_description) %>% 
+  summarize(counties = n_distinct(state_county_fips))
+
+# Checking unique counties for both types together just in case there is overlap
+wildfire_counties <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>%
+  filter(event_type_description %in% c("Fire - Canadian.", "Wildfire-U. S.")) %>% 
+  distinct(state_county_fips)
+
+# 18 states from Oregon, to Ohio, to Rhode Island and Louisiana 
+wildfire_state <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>%
+  filter(event_type_description %in% c("Fire - Canadian.", "Wildfire-U. S.")) %>% 
+  distinct(state)
+
+# Prep county days by pollutant 
+concurred_days_by_county_pollutant_and_event <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>%
+  mutate(date = as_date(sample_date_time)) %>% 
+  group_by(state_county_fips, event_type_description, pollutant_name) %>% 
+  summarize(days = n_distinct(date))
+
+county_days_by_pollutant_and_event <- concurred_days_by_county_pollutant_and_event %>% 
+  group_by(event_type_description, pollutant_name) %>% 
+  summarize(days = sum(days))
+
+```
+# 4: Increasing flags and demonstrations 
+
+
+```{r}
+events_by_year <- all_events %>% 
+  # Using the "created" date here because we're measuring when flags are happening over time, not when events are happening
+  # Plus created date is more consisent the start and end, which have 39 missing values 
+  mutate(year = year(dmy(created_date))) %>% 
+  group_by(year) %>% 
+  summarize(submissions = n_distinct(exceptional_event_id))
+```
+
+```{r}
+# The amount of events by year doesn't show a clear trend
+events_by_year <- all_events %>%
+  filter(!is.na(event_begin_date)) %>% 
+  filter(!is.na(event_end_date)) %>% 
+  mutate(event_begin_date = dmy(event_begin_date)) %>%
+  mutate(year = year(event_begin_date)) %>% 
+  group_by(year) %>% 
+  summarize(submissions = n_distinct(exceptional_event_id))
+
+# The amount of days flagged by year doesn't either
+events_by_year <- all_events %>% 
+  # Using the "created" date here because we're measuring when flags are happening over time, not when events are happening
+  # Plus created date is more consistent the start and end, which have 39 missing values 
+  mutate(year = year(dmy(created_date))) %>% 
+  group_by(year) %>% 
+  summarize(submissions = n_distinct(exceptional_event_id))
+
+```
+
+```{r}
+# The amount of days flagged does show an increase, just as we broke out in finding 1
+length_of_events_by_year_df <- all_events %>%
+  filter(!is.na(event_begin_date)) %>% 
+  filter(!is.na(event_end_date)) %>% 
+  mutate(event_begin_date = dmy(event_begin_date)) %>% 
+  mutate(event_end_date = dmy(event_end_date)) %>% 
+  mutate(event_length = 1 + (event_end_date - event_begin_date)) %>% 
+  mutate(year = year(event_begin_date)) %>%
+  group_by(year) %>% 
+  summarize(days = sum(event_length))
+  
+
+wildfire_submissons_by_year <- all_events %>%
+  filter(!is.na(event_begin_date)) %>% 
+  filter(!is.na(event_end_date)) %>% 
+  filter(qualifier_code %in% c("RT","RF")) %>% 
+  mutate(event_begin_date = dmy(event_begin_date)) %>%
+  mutate(year = year(event_begin_date)) %>% 
+  group_by(year) %>% 
+  summarize(submissions = n_distinct(exceptional_event_id))
+
+
+concurred_wildfire_events <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>%
+  mutate(date = as_date(sample_date_time)) %>% 
+  mutate(year = year(sample_date_time)) %>% 
+  filter(event_type_description %in% c("Fire - Canadian.", "Wildfire-U. S.")) %>% 
+  group_by(year) %>% 
+  summarize(days = n_distinct(exceptional_event_id))
+
+concurred_wildfire_days_by_county_and_type <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>%
+  mutate(date = as_date(sample_date_time)) %>% 
+  mutate(year = year(sample_date_time)) %>% 
+  filter(event_type_description %in% c("Fire - Canadian.", "Wildfire-U. S.")) %>% 
+  group_by(state_county_fips, year) %>% 
+  summarize(days = n_distinct(date))
+
+
+concurred_wildfire_county_days_by_year <- concurred_wildfire_days_by_county_and_type %>% 
+  group_by(year) %>% 
+  summarize(days = sum(days))
+
+
+```
+
+```{r}
+# Wildfire submissions increase in step with worst wildfire years
+
+ggplotly(ggplot(wildfire_submissons_by_year, aes(x = year, y = submissions)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  theme(axis.title.x=element_blank(), axis.text.x=element_blank()))
+
+```
+
+# 5: EPA acceptence varies by state
+
+```{r}
+# County days by state and county 
+concurred_days_by_county <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>%
+  mutate(date = as_date(sample_date_time)) %>% 
+  group_by(state_county_fips, county, state) %>% 
+  summarize(days = n_distinct(date))
+
+concurred_days_by_county_and_pollutant <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>%
+  mutate(date = as_date(sample_date_time)) %>% 
+  group_by(state_county_fips, county, state, pollutant_name) %>% 
+  summarize(days = n_distinct(date))
+
+county_days_by_state <- concurred_days_by_county %>% 
+  group_by(state) %>% 
+  summarize(days = sum(days))
+
+
+```
+
+6: Nevada County check
+```{r}
+nevada_county_days <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>%
+  filter(county == "Nevada County") %>% 
+  mutate(date = as_date(sample_date_time)) %>% 
+  distinct(date, exceptional_event_id)
+  
+```
+
+7: Who gets blamed 
+```{r}
+blame_data <- read_csv("here"("data", "processed", "blame_demos.csv")) %>% 
+  select(starts_with("origin")) 
+
+# Come back to this when we have states on demos and finalize 
+
+test <- as.list(lapply(blame_data, unique))
+
+
+```
+
