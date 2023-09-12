@@ -64,6 +64,8 @@ mcmurray_concurrences <- concurrences_and_non %>%
   filter(date >= "2016-05-01" & date <= "2016-06-01") %>% 
   left_join(fips, by = "state_county_fips")
 
+write.csv(mcmurray_concurrences, "data/processed/for_vis/mcmurray_concurrences.csv")
+
 # Dataframe to help look up concentration plots and join later to mark concurred days 
 for_concetration_plot <- mcmurray_concurrences %>% 
   distinct(airs_monitor_id, state, county, date) %>% 
