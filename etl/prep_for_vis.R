@@ -6,6 +6,7 @@ library(lubridate)
 library(hms)
 library(tidycensus)
 library(plotly)
+library(stringr)
 
 
 
@@ -128,5 +129,24 @@ concentration_plot_df <-  df %>%
 
 
 write.csv(concentration_plot_df, "data/processed/for_vis/concentration_plot_df.csv")
+
+# Latitude and longitude for monitors with concurrences 
+all_monitors <- read_csv(here("data", "raw", "aqs_monitors.csv")) %>% 
+  clean_names() %>% 
+  mutate(airs_monitor_id = paste(state_code, county_code, site_number, parameter_code, sep = "-")) %>% 
+  distinct(airs_monitor_id, latitude, longitude, local_site_name, state_name, county_name) 
+
+
+concurred_monitors <- concurrences_and_non %>%
+  filter(concurrence_ind == "Y") %>%
+  distinct(airs_monitor_id) %>% 
+  mutate(airs_monitor_id = str_sub(airs_monitor_id, end = 17)) %>% 
+  left_join(all_monitors, by = "airs_monitor_id")
+
+
+write.csv(concurred_monitors, "data/processed/for_vis/concurred_monitors_with_lat_longs.csv")
+
+
+
 
 
