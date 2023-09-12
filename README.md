@@ -20,9 +20,9 @@ The [data we recieved](https://drive.google.com/file/d/1bSQ8-3ljmUkrWKIxyuSHIbUx
 
 ### Exceptional Events 
 
-The EPA also provided us with [a dataset of exceptional event demonstrations](https://docs.google.com/spreadsheets/d/13AODNzQFGAAyaNCHSm7ROTk65_4_0FKU/edit?usp=drive_link&ouid=106876771194730767051&rtpof=true&sd=true). The relationship between this data and other data we received, the AQS data, is often called a one-to-many relationship in database language. That is, one demonstration could include multiple readings over multiple days. 
+The EPA also provided us with [a dataset of exceptional events](https://docs.google.com/spreadsheets/d/13AODNzQFGAAyaNCHSm7ROTk65_4_0FKU/edit?usp=drive_link&ouid=106876771194730767051&rtpof=true&sd=true). The relationship between this data and other data we received, the AQS data, is often called a one-to-many relationship in database language. That is, one exceptional event could include multiple readings over multiple days. 
 
-
+Each row in this data is an exceptional event with similar columns to the AQS data described above. 
 
 ### Final agency actions 
 
