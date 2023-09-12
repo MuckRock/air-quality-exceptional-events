@@ -5,7 +5,7 @@ You can find earlier work about wildfire pollution from MuckRock and the Califor
 
 ## Data
 
-All raw data can be found in [Google Drive](https://drive.google.com/drive/u/0/folders/1YCLncS7uQkZBWLybMU5tR4OeLuNRIysP). The scripts to clean and organize this data can be found in [`etl`](etl) and the output of those scripts can be found in [`data/processed`]. Processed data used for [`analysis`](analysis) and visualization. 
+All raw data can be found in [Google Drive](https://drive.google.com/drive/u/0/folders/1YCLncS7uQkZBWLybMU5tR4OeLuNRIysP). The scripts to clean and organize this data can be found in [`etl`](etl) and the output of those scripts can be found in [`data/processed`](data/processed). Processed data used for [`analysis`](analysis) and visualization. 
 
 ### EPA's Air Quality System 
 The [EPA’s Air Quality System (AQS)](https://www.epa.gov/aqs) is a hub of all the different types of air quality data the EPA collects across the country. These data are provided by the EPA in different forms for scientists and members of the public to analyze data primarily in the context of public health, according to the EPA. 
