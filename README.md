@@ -45,7 +45,7 @@ The most important trade-off is that this methodology underweights counties with
 
 ### Population impacted 
 
-To measure the potential public health consequences of concurrences, we calculated by the amount of people who currently live in a county where pollution has been written off the books since 2016. For population totals, we used the [bicennial Census 2022 data](https://drive.google.com/file/d/1a1rvxFBCJDeip6ynlteJWJFGdYHqN4ny/view?usp=sharing) for each county that has recieved a concurrence from the EPA. 
+To measure the potential public health consequences of concurrences, we calculated the amount of people who currently live in a county where pollution has been written off the books since 2016. For population totals, we used the [bicennial Census 2022 data](https://drive.google.com/file/d/1a1rvxFBCJDeip6ynlteJWJFGdYHqN4ny/view?usp=sharing) for each county that has recieved a concurrence from the EPA. 
 
 For the “final Agency actions” we analyzed from the [Federal Register](https://www.federalregister.gov/), we followed a similar methodology. The 20 documents of final action that we found represent several different types of geographies: towns and cities, counties and core-based statistical areas. We reviewed each document to be sure that our geographic area aligned as closely with the EPA’s as possible, and when needed, erred on the conservative side, for example, by excluding counties the EPA defined as partially included in their ruling. [We then calculated the populations](etl/federal_register_pop_estimates.R) for these areas [using Census population estimates](data/processed/cesnsus) for the year that EPA's decision was made. 
 
