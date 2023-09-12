@@ -15,7 +15,7 @@ One year ago, we noticed a column in some of these publicly available datasets c
 ### AQS Readings 
 Over a period of several months, we negotiated a data request with the EPA to recieve more extensive AQS data that includes variables and information mentioned in [the slides from both older](https://www.epa.gov/sites/default/files/2018-05/documents/webinar_on_exceptional_events_mitigation_plans_20180418_508.pdf) and [more recent presentations given by the EPA’s air quality department](https://cleanairact.org/wp-content/uploads/2022/05/Exceptional-Events-Program-Updates-Beth-Palma.pdf). 
 
-The [data we recieved](https://drive.google.com/file/d/1bSQ8-3ljmUkrWKIxyuSHIbUxDc4qxdiZ/view?usp=drive_link) are air monitor readings for all EPA air monitors across the country that were flagged for an exceedence caused by exceptional events. Each row has a monitor ID and a reading at that monitor along with several columns that describe what the event was, when it was submitted, and any text comments on the event. 
+The [data we recieved](https://drive.google.com/file/d/1bSQ8-3ljmUkrWKIxyuSHIbUxDc4qxdiZ/view?usp=drive_link) are air monitor readings for all EPA air monitors across the country that were flagged for an exceedence caused by exceptional events. Each row has a monitor ID and a reading at that monitor along with several columns that describe what the event was, when it was submitted and any text comments on the event. 
 
 
 ### Exceptional Events 
