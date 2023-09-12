@@ -40,8 +40,18 @@ A smaller subset of events later become "demonstrations," meaning the local air 
 There are 150 unique exceptional event IDs in the AQS datad, which means there have been 150 demonstrations submitted of the 699 events flagged since 2016. We’ve [collected 130 demonstrations](https://www.documentcloud.org/app?q=%2Bproject%3Aair-quality-exceptions-212458%20%2Bdata_type%3A%22final_demonstration%22) since 2016 through FOIA requests. 
 
 ### County-days 
+The EPA calls their decision to agree with a state or local air agency on what data to exclude from the record a “concurrence” and a rejection of that proposal a “nonconcurrence.” In [the AQS data](https://drive.google.com/file/d/1bSQ8-3ljmUkrWKIxyuSHIbUxDc4qxdiZ/view?usp=drive_link) this is recorded in a column called `concurrence_indicator` with a value of either "Y" for yes and "N" for no. These indicators are added to hourly data by monitor and each hourly reading can have up to four different types of standards for concurrence indicators.
+
+As journalists, we are interested in both counting the amount of air pollution excluded from the record and understanding how different areas of the country and different pollutants compare. To this end, we discussed methodologies with several atmosheric scientists and air pollution experts, and decided to measure EPA concurrences using a metric called county-days. This means that for any single day in a county where there is a concurrence for any number of concurrence standards at any number of monitors, we will count one county-day. 
+
+The most important trade-off is that this methodology underweights counties with more monitors. However, this makes all counties, pollutants and monitoring-schedules easier to compare more broadly. 
 
 ### Population impacted 
+
+To measure the potential public health consequences of concurrences, we calculated by the amount of people who currently live in a county where pollution has been written off the books since 2016. For population totals, we used the [bicennial Census 2022 data](https://drive.google.com/file/d/1a1rvxFBCJDeip6ynlteJWJFGdYHqN4ny/view?usp=sharing) for each county that has recieved a concurrence from the EPA. 
+
+For the “final Agency actions” we analyzed from the [federal register](https://www.federalregister.gov/), we followed a similar methodology. The 20 documents of final action that we found represent several different types of geographies: towns and cities, counties and core-based statistical areas. We reviewed each document to be sure that our geographic area aligned as closely with the EPA’s as possible, and when needed, erred on the conservative side, for example, by excluding counties the EPA defined as partially included in their designation. We then calculated the populations for these areas by Census population estimates for the year that EPA's decision was made. 
+
 
 ## Questions / Feedback
 Contact Dillon Bergin at dillon@muckrock.com
