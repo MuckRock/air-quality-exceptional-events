@@ -65,10 +65,15 @@ mcmurray_concurrences <- concurrences_and_non %>%
   filter(date >= "2016-05-01" & date <= "2016-06-01") %>% 
   left_join(fips, by = "state_county_fips")
 
+wayne_and_nevada_concurrences <- concurrences_and_non %>%
+  left_join(fips, by = "state_county_fips") %>% 
+  filter(county %in% c("Wayne County", "Nevada County")) 
+
+
 write.csv(mcmurray_concurrences, "data/processed/for_vis/mcmurray_concurrences.csv")
 
 # Dataframe to help look up concentration plots and join later to mark concurred days 
-for_concetration_plot <- mcmurray_concurrences %>% 
+for_concetration_plot <- rbind(mcmurray_concurrences, wayne_and_nevada_concurrences) %>% 
   distinct(airs_monitor_id, state, county, date) %>% 
   mutate(site_id = substr(gsub("-", "", airs_monitor_id), start = 1, stop = 9)) %>% 
   mutate(concurred = "Y")
@@ -77,10 +82,6 @@ for_concetration_plot <- mcmurray_concurrences %>%
 # Impacts Connecticut, Maryland, Massachusetts, New Jersey, Pennsylvania and Rhode Island ozone
 # Impacts Ohio for both Ozone and PM2.5 
   
-
-# Write clean CSVs to folder for visualizations 
-write.csv(mcmurray_concurrences, "data/processed/for_vis/mcmurrary_fire_concurrences.csv")
-
 
 # Exceptional events by days and type for High Winds and Wildfires
 
@@ -147,6 +148,10 @@ concurred_monitors <- concurrences_and_non %>%
 write.csv(concurred_monitors, "data/processed/for_vis/concurred_monitors_with_lat_longs.csv")
 
 
+# Data for Wayne County and Nevada County concurrences 
 
-
+wayne_and_nevada <- concurrences_and_non %>%
+  left_join(fips, by = "state_county_fips") %>% 
+  filter(county %in% c("Wayne County", "Nevada County")) %>% 
+  distinct(county, pollutant_name, airs_monitor_id, date)
 

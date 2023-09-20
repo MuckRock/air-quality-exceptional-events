@@ -51,7 +51,8 @@ events_by_days_df <- all_events %>%
   mutate(event_begin_date = dmy(event_begin_date)) %>% 
   mutate(event_end_date = dmy(event_end_date)) %>% 
   # counts the day the event begins 
-  mutate(event_length = 1 + (event_end_date - event_begin_date))
+  mutate(event_length = 1 + (event_end_date - event_begin_date)) 
+
 
 ```
 
@@ -72,6 +73,41 @@ ggplotly(ggplot(days_of_events_submissions_by_year_df, aes(x = year, y = days, f
   theme(axis.title.x=element_blank(), axis.text.x=element_blank()))
 ```
 
+1.5: The calendar days of events flagged by year 
+
+
+```{r}
+test <- all_events %>% 
+  filter(!is.na(event_begin_date)) %>% 
+  filter(!is.na(event_end_date)) %>% 
+  mutate(event_begin_date = dmy(event_begin_date)) %>% 
+  mutate(event_end_date = dmy(event_end_date)) %>% 
+  mutate(event_length = 1 + (event_end_date - event_begin_date)) %>% 
+  filter(event_length < 100) %>% 
+  select(exceptional_event_id, qualifier_code, event_begin_date, event_end_date)
+  
+
+test_2 <- test %>% 
+  rowwise() %>% 
+  mutate(dates = list(seq(event_begin_date, event_end_date, by = "day"))) %>% 
+  unnest(dates) %>% 
+  mutate(year = year(dates)) %>% 
+  group_by(year, qualifier_code) %>% 
+  summarize(days = n_distinct(dates))
+  
+  
+```
+```{r}
+ggplotly(ggplot(test_2, aes(x = year, y = days, fill = qualifier_code))+geom_bar(stat = "identity") +
+  theme_minimal() +
+  theme(axis.title.x=element_blank(), axis.text.x=element_blank()))
+```
+
+
+
+
+
+
 # 2: An even larger number of people - xx million - live in areas where the Environmental Protection Agency has signaled a willingness to ignore pollution exceedances. 
 
 ```{r}
@@ -85,6 +121,32 @@ aqs_df <- read_csv(here("data", "raw", "muckrock_request_exclusion_ee.csv")) %>%
   mutate(state_county_fips = str_remove(str_sub(airs_monitor_id, 1, 6), pattern= "-")) %>% 
   mutate(year = year(as_date(sample_date_time))) %>% 
   left_join(fips, by = "state_county_fips") 
+```
+```{r}
+# Concurrences county-days by year 
+concurred_county_days_by_year <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>%
+  mutate(date = as_date(sample_date_time)) %>%
+  mutate(year = year(date)) %>% 
+  group_by(year, state_county_fips) %>% 
+  summarize(days = n_distinct(date)) %>% 
+  ungroup() %>% 
+  group_by(year) %>% 
+  summarize(days = sum(days))
+
+# Concurred events by year 
+concurred_events_by_year <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>%
+  mutate(date = as_date(sample_date_time)) %>%
+  mutate(year = year(date)) %>%
+  group_by(year) %>% 
+  summarize(events = n_distinct(exceptional_event_id))
+
+events_by_state <- aqs_df %>% 
+  group_by(state) %>% 
+  summarize(num = n_distinct(exceptional_event_id))
+
+
 ```
 
 ```{r}
