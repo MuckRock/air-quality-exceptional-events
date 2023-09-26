@@ -159,9 +159,13 @@ unique_counties <- aqs_df %>%
   # Take out Dona Ana cuz of typographical error 
   filter(!county == "Dona Ana County")
 
-# 20 states 
+# 20 states concurred 
 unique_states <- aqs_df %>% 
   filter(concurrence_ind == "Y") %>% 
+  distinct(state)
+
+# 21 states in total
+unique_states <- aqs_df %>% 
   distinct(state)
 
 # Connect with Census 2022 data to show how many now live in these counties, since this is a current / future-oriented finding
@@ -209,7 +213,7 @@ concurred_county_days_by_type <- aqs_df %>%
   summarize(days = n_distinct(date))
 
 # 236 days of wildfires were erased from air
-county_days_by_event_type <- concurred_days_by_type %>% 
+county_days_by_event_type <- concurred_county_days_by_type %>% 
   group_by(event_type_description) %>% 
   summarize(days = sum(days))
 
@@ -367,12 +371,6 @@ nevada_county_days <- aqs_df %>%
 
 7: Who gets blamed 
 ```{r}
-blame_data <- read_csv("here"("data", "processed", "blame_demos.csv")) %>% 
-  select(starts_with("origin")) 
-
-# Come back to this when we have states on demos and finalize 
-
-test <- as.list(lapply(blame_data, unique))
 
 
 ```

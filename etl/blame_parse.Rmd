@@ -1,0 +1,112 @@
+---
+title: "test"
+date: "`r Sys.Date()`"
+params:
+  pdf_mode:
+    value: true
+  sheet_is_publicly_readable:
+    value: false
+output:
+  pagedown::html_letter:
+    self_contained: true
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  results='asis', 
+  echo = FALSE
+)
+
+library(tidyverse)
+library(jsonlite)
+library(purrr)
+library(glue)
+library(gluedown)
+library(lubridate)
+library(zoo)
+library(here)
+
+```
+
+```{r results=F, warning=F, message=F}
+json <- read_csv(here("data", "manual", "blame_demos.csv")) 
+
+```
+
+```{r results=F, warning=F, message=F}
+# Key pairs df 
+df <- 
+  json %>% 
+  select(id, description, `Key Value Pairs`) %>% 
+  mutate(key_pairs = gsub("'", '"', `Key Value Pairs`)) %>% 
+  mutate(key_pairs = map(key_pairs, fromJSON)) %>% 
+  select(id, key_pairs) %>% 
+  unnest_wider(key_pairs) 
+```
+
+```{r}
+blamers_long <- df %>% 
+  select(id, state, starts_with("origin")) %>% 
+  pivot_longer(cols = -c("state", "id"), names_to = "origin", values_to = "blamed") %>% 
+  mutate(blamed = str_to_lower(blamed)) %>% 
+  mutate(blamed = str_replace(blamed, "_", " ")) %>% 
+  filter(!is.na(blamed)) %>% 
+  filter(!state == blamed) %>% 
+  group_by(state, blamed) %>%
+  rename(blamer = state) %>% 
+  summarize(num_times = n()) 
+  
+```
+
+```{r}
+blamed_long <- df %>% 
+  select(id, state, starts_with("origin")) %>% 
+  pivot_longer(cols = -c("state", "id"), names_to = "origin", values_to = "blamed") %>% 
+  mutate(blamed = str_to_lower(blamed)) %>% 
+  mutate(blamed = str_replace(blamed, "_", " ")) %>% 
+  filter(!is.na(blamed)) %>% 
+  filter(!state == blamed) %>% 
+  group_by(blamed, state) %>%
+  summarize(num = n()) 
+
+# export data for vis 
+write.csv(blamed_long, here("data", "processed", "for_vis", "demos_blamed.csv"))
+
+  
+```
+
+```{r}
+blamers_wide <- df %>% 
+  select(id, state, starts_with("origin")) %>% 
+  pivot_longer(cols = -c("state", "id"), names_to = "origin", values_to = "blamed") %>% 
+  mutate(blamed = str_to_lower(blamed)) %>% 
+  mutate(blamed = str_replace(blamed, "_", " ")) %>% 
+  filter(!is.na(blamed)) %>% 
+  filter(!state == blamed) %>% 
+  group_by(state, blamed) %>%
+  summarize(num = n()) %>% 
+  pivot_wider(names_from = blamed, values_from = num)
+  
+```
+
+
+```{r}
+blamed_wide <- df %>% 
+  select(id, state, starts_with("origin")) %>% 
+  pivot_longer(cols = -c("state", "id"), names_to = "origin", values_to = "blamed") %>% 
+  mutate(blamed = str_to_lower(blamed)) %>% 
+  mutate(blamed = str_replace(blamed, "_", " ")) %>% 
+  filter(!is.na(blamed)) %>% 
+  filter(!state == blamed) %>% 
+  group_by(blamed, state) %>%
+  summarize(num = n()) %>% 
+  pivot_wider(names_from = state, values_from = num) %>% 
+  mutate(total= rowSums(across(where(is.numeric)), na.rm=TRUE))
+  
+```
+
+
+
+
+
+
