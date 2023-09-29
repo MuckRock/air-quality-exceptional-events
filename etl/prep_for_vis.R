@@ -163,7 +163,7 @@ df <- read_excel(here("data", "raw", "muckrock_req_excl_ee_v2.xlsx")) %>%
   mutate(state_county_fips = str_remove(str_sub(airs_monitor_id, 1, 6), pattern= "-"))
 
 df_fips_lat_longs <- df %>% 
-  left_join(fips, by = "state_county_fips") %>% 
+  mutate(airs_monitor_id = str_sub(airs_monitor_id, end = 17)) %>% 
   left_join(all_monitors, by = "airs_monitor_id")
 
 #write_csv(df_fips_lat_longs, "for_chris_lookup.csv")
