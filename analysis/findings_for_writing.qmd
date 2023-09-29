@@ -375,3 +375,16 @@ nevada_county_days <- aqs_df %>%
 
 ```
 
+8: Industry agencies 
+
+
+```{r}
+df <- read_excel(here("data", "raw", "muckrock_req_excl_ee_v2.xlsx"))
+
+agencies <- df %>% 
+  clean_names() %>% 
+  mutate(state_county_fips = str_remove(str_sub(airs_monitor_id, 1, 6), pattern= "-")) %>% 
+  left_join(fips, by = "state_county_fips") %>% 
+  distinct(agency_desc, state)
+```
+

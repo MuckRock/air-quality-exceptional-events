@@ -155,3 +155,16 @@ wayne_and_nevada <- concurrences_and_non %>%
   filter(county %in% c("Wayne County", "Nevada County")) %>% 
   distinct(county, pollutant_name, airs_monitor_id, date)
 
+# Data for Chris Amico lookup
+
+df <- read_excel(here("data", "raw", "muckrock_req_excl_ee_v2.xlsx")) %>% 
+  clean_names() %>% 
+  mutate(date = as_date(sample_date_time)) %>% 
+  mutate(state_county_fips = str_remove(str_sub(airs_monitor_id, 1, 6), pattern= "-"))
+
+df_fips_lat_longs <- df %>% 
+  left_join(fips, by = "state_county_fips") %>% 
+  left_join(all_monitors, by = "airs_monitor_id")
+
+#write_csv(df_fips_lat_longs, "for_chris_lookup.csv")
+
