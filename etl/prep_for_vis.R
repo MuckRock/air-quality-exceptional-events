@@ -166,5 +166,5 @@ df_fips_lat_longs <- df %>%
   mutate(airs_monitor_id = str_sub(airs_monitor_id, end = 17)) %>% 
   left_join(all_monitors, by = "airs_monitor_id")
 
-#write_csv(df_fips_lat_longs, "for_chris_lookup.csv")
+write_csv(df_fips_lat_longs, "for_chris_lookup.csv")
 
