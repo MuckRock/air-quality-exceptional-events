@@ -1,0 +1,89 @@
+---
+title: "test"
+date: "`r Sys.Date()`"
+params:
+  pdf_mode:
+    value: true
+  sheet_is_publicly_readable:
+    value: false
+output:
+  pagedown::html_letter:
+    self_contained: true
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  results='asis', 
+  echo = FALSE
+)
+
+library(tidyverse)
+library(jsonlite)
+library(purrr)
+library(glue)
+library(gluedown)
+library(lubridate)
+library(zoo)
+library(tidycensus)
+library(janitor)
+library(here)
+library(readxl)
+```
+
+```{r results=F, warning=F, message=F}
+# Read in the json data that was scraped from all 'final_demonstration' tagged data on DocumentCloud 
+# These documents (around 138) come from open records requests to all 10 EPA Regions across the country for all demonstrations submitted after 1/12016
+json <- read_csv(here("data", "manual", "blame_metadata_demonstrations.csv"))
+
+```
+
+```{r results=F, warning=F, message=F}
+# Unnest JSON into a dataframe to work with in comparing it to the dataset of exceptional events 
+# We want to compare the number of documents we got back to the number of events in the data the EPA sent us
+# ^ They might not be the same because multiple events can make it into one demonstration and some events/demos haven't been decided upon 
+# So likely they aren't the same, but we want to be sure we aren't missing any states entirely 
+final_demos_by_state <- 
+  json %>% 
+  select(id, description, `Key Value Pairs`) %>% 
+  mutate(key_pairs = gsub("'", '"', `Key Value Pairs`)) %>% 
+  mutate(key_pairs = map(key_pairs, fromJSON)) %>% 
+  select(id, key_pairs) %>% 
+  unnest_wider(key_pairs) %>% 
+  select(id, name, state) %>% 
+  group_by(state) %>% 
+  summarize(final_demos = n())
+```
+
+```{r}
+# Now lets load in the data we have from the EPA for comparison
+# This is a data set of all exceptional events and flags for whether the EPA concurred 
+# A "Y" or "N" indicator means the EPA has decided on the event; an NA means they haven't decided or haven't seen the submission yet 
+fips <- as.data.frame(fips_codes) %>% 
+  mutate(state_county_fips = paste0(state_code, county_code)) %>%  
+  select(state_name, county, state_county_fips) %>% 
+  rename(state = state_name)
+
+aqs_df <- read_excel(here("data", "raw", "muckrock_req_excl_ee_v2.xlsx")) %>% 
+  clean_names()  
+
+
+events_by_state <- aqs_df %>%
+  filter(!is.na(concurrence_ind)) %>% 
+  mutate(state_county_fips = str_remove(str_sub(airs_monitor_id, 1, 6), pattern= "-")) %>% 
+  mutate(year = year(as_date(sample_date_time))) %>% 
+  left_join(fips, by = "state_county_fips") %>% 
+  group_by(state) %>% 
+  summarize(exceptional_events = n_distinct(exceptional_event_id)) %>% 
+  mutate(state = tolower(state))
+
+```
+
+```{r}
+# Ok now let's look at the side by side 
+# So the good news is that our states line up exactly. There is variation, but we shouldn't be missing all demonstrations for a given state. We have at least one demonstration for each state that has at least one concurrence in the data
+# We may be missing states and it's weird that Wyoming has demonstrations but EEs in the data, but the EPA didn't make this system for this to line up anyway
+events_and_demos <- final_demos_by_state %>% 
+  full_join(events_by_state, by = "state")
+
+```
+

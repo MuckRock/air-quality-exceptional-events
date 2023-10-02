@@ -1,0 +1,674 @@
+---
+title: "Findings"
+execute:
+  output: false
+  echo: false
+format:
+  html:
+    code-tools: true
+    theme: cosmo
+    toc: true
+---
+
+```{r}
+library(tidyverse)
+library(here)
+library(janitor)
+library(readxl)
+library(lubridate)
+library(plotly)
+library(htmltools)
+library(DT)
+library(tidycensus)
+library(censusapi)
+Sys.setenv(CENSUS_KEY="f0c4bf511063de6900e4007c6f8fef68641af8d7")
+```
+
+
+# Events and county-days in AQS data 
+
+```{r}
+fips <- as.data.frame(fips_codes) %>% 
+  mutate(state_county_fips = paste0(state_code, county_code)) %>%  
+  select(state_name, county, state_county_fips) %>% 
+  rename(state = state_name)
+
+aqs_df <- read_excel(here("data", "raw", "muckrock_req_excl_ee_v2.xlsx")) %>% 
+  clean_names() %>% 
+  mutate(state_county_fips = str_remove(str_sub(airs_monitor_id, 1, 6), pattern= "-")) %>% 
+  mutate(year = year(dmy(sample_date_time))) %>% 
+  left_join(fips, by = "state_county_fips") %>% 
+  mutate(date = dmy(sample_date_time))
+```
+
+## Number of unique counties and states with a concurrence
+
+::: {.callout-note collapse="true"}
+## Sentences in copy
+- Findings: *A legal loophole has allowed the US Environmental Protection Agency to strike pollution from clean air tallies in **more than 70 counties**.*
+- Findings: *The adjustments came in **more than 70 counties across 20 states**.*
+- Explainer: *The adjustments came in **more than 70 counties across 20 states**...*
+:::
+
+
+### Counties with at least one concurrence 
+```{r}
+concurred_counties <- aqs_df %>%
+  filter(concurrence_ind == "Y") %>% 
+  distinct(state_county_fips, county, state)
+
+```
+
+```{r}
+#| output: true
+#| column: page
+datatable(concurred_counties, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+```
+### States with at least one concurrence 
+```{r}
+concurred_states <- aqs_df %>%
+  filter(concurrence_ind == "Y") %>% 
+  distinct(state)
+```
+
+```{r}
+#| output: true
+#| column: page
+datatable(concurred_states, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+```
+### States whose demos the EPA has concurred on 
+
+::: {.callout-note collapse="true"}
+## Sentences in copy
+- Findings: *Local regulators **in 21 states** filed requests with the agency to forgive pollution...*
+- Industry: *Regulators have approached the EPA about exceptional events, or actually made filings, in **at least 29 states**.*
+  - 29 = 21 + [8 more states Molly has found and documented](https://docs.google.com/document/d/1wxhFir2-eQqnvgsqPMmUorsVrhHmu6cmSma8ghLhAFQ/edit) 
+:::
+
+
+```{r}
+submitted_states <- aqs_df %>%
+  filter(concurrence_ind == "Y" | concurrence_ind == "N" ) %>% 
+  distinct(state)
+```
+
+```{r}
+#| output: true
+#| column: page
+datatable(submitted_states, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+```
+## Exceptional events (unique IDs) that the EPA has concurred on
+
+::: {.callout-note collapse="true"}
+## Sentences in copy
+- Explainer: *The agency agreed to adjust the data **on 139** of them*
+:::
+
+
+```{r}
+concurred_events <- aqs_df %>%
+  filter(concurrence_ind == "Y") %>% 
+  distinct(exceptional_event_id, state, event_type_description, event_description)
+```
+### Concurred events
+::: {.callout-important}
+The event with the ID "1900" was used in both Ohio and Connecticut for McMurrary fires. Thus, there are 140 unique ID/state combos and and 139 unique IDs
+:::
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(concurred_events, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+## Why wildfire exceptional events are so different than other event types 
+
+::: {.callout-note collapse="true"}
+## Sentences in copy
+- Findings: *When wildfire causes air pollution, the rule has been applied to **more monitor readings over multiple days**, not just to exclude particulate pollution, but also to apply to smog or ozone.*  
+:::
+
+### Concurred exceptional events comparison
+
+```{r}
+concurred_county_days_by_event_type <- aqs_df %>%
+  filter(concurrence_ind == "Y") %>%
+  distinct(event_type_description, county, date) %>% 
+  group_by(event_type_description) %>% 
+  summarize(county_days = n())
+  
+concurred_event_type_comparison <- aqs_df %>%
+  filter(concurrence_ind == "Y") %>% 
+  group_by(event_type_description) %>%
+  summarize(unique_monitors = n_distinct(airs_monitor_id), unique_counties = n_distinct(state_county_fips), unique_pollutants = n_distinct(pollutant_name)) %>% 
+  inner_join(concurred_county_days_by_event_type, by = "event_type_description")
+  
+```
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(concurred_event_type_comparison, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+
+### All exceptional events comparison
+::: {.callout-important}
+The numbers below represent all exceptional events (IDs) flagged in the data and not just events that were concurred on by the EPA. 
+:::
+
+```{r}
+county_days_by_event_type<- aqs_df %>%
+  distinct(event_type_description, county, date) %>% 
+  group_by(event_type_description) %>% 
+  summarize(county_days = n())
+  
+event_type_comparison <- aqs_df %>%
+  group_by(event_type_description) %>%
+  summarize(unique_monitors = n_distinct(airs_monitor_id), unique_counties = n_distinct(state_county_fips), unique_pollutants = n_distinct(pollutant_name)) %>% 
+  inner_join(county_days_by_event_type, by = "event_type_description")
+  
+```
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(event_type_comparison, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+## County-days by county and state
+
+::: {.callout-note collapse="true"}
+## Sentences in copy
+- Findings: *The recent experience of California's Nevada County may offer a glimpse of a smokier future. There, the exceptional events rule **has removed 16 days from the record** in the last five years.*
+- Industry: *Regulators accomplished that feat by removing **two of the highest-ozone days** from their calculations.*
+  - This is referring to Detroit, below as Wayne County 
+- Industry: *No state has filed more requests **than California**...*
+:::
+
+### Concurred county-days by county 
+
+```{r}
+concurred_county_days_by_county <- aqs_df %>%
+  filter(concurrence_ind == "Y") %>% 
+  group_by(state_county_fips, state, county) %>% 
+  summarize(days = n_distinct(date))
+  
+```
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(concurred_county_days_by_county, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+
+### Concurred county-days by state 
+
+```{r}
+concurred_county_days_by_state <- concurred_county_days_by_county %>% 
+  group_by(state) %>% 
+  summarize(days = sum(days))
+  
+```
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(concurred_county_days_by_state, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+
+
+## County days by event type 
+
+::: {.callout-note collapse="true"}
+## Sentences in copy
+- Solutions: *But **not a single prescribed fire** has been forgiven under the exceptional events rule since then.*
+- Explainer: *In **three-fourths of all days exceptional events were flagged**, local governments pointed at wildfires in justifying their requests.*
+:::
+
+### Concurred county-days by event type
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(concurred_county_days_by_event_type, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+### County days by event type 
+- (1965 + 199 + 1) / 2877 days = 75 percent
+```{r}
+#| output: true
+#| column: page
+
+datatable(county_days_by_event_type, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+
+## Wildfire events by year 
+
+::: {.callout-note collapse="true"}
+## Sentences in copy
+- Explainer: *In 2016 **19 wildfire events** were reported to the EPA. In 2020, **65 were.***
+- Findings: *Our analysis of local and EPA records has found that in 2016, air agencies flagged **19 wildfire events** as potential exceptional events. In 2018 and 2021, **52 wildfire events** were flagged. In 2020, **65 were**.*
+
+:::
+
+
+```{r}
+wildfire_events_by_year <- aqs_df %>%
+  filter(event_type_description %in% c("Wildfire-U. S.", "Fire - Mexico/Central America.", "Fire - Canadian.")) %>% 
+  group_by(year) %>% 
+  summarize(events = n_distinct(exceptional_event_id))
+  
+```
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(wildfire_events_by_year, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+
+## Events flagged in EE data 
+::: {.callout-important}
+The data below is a seperate dataset than used in all the findings above. This dataset does not match up 1:1 with the dataset above, which connects exceptional events and their related AQS data. We believe the latter is more accurate, which is why we rely on it for all other findings. However, for a total number of events, this dataset of exceptional events has over 100 more than the AQS data and may be more accurate for the big picture of submissions through the Exceptional Events Tracking System (EETS)
+:::
+
+
+::: {.callout-note collapse="true"}
+## Sentences in copy
+- Findings: *In total, local regulators made note of about **700 separate exceptional events**...*
+- Explainer: ***700 separate exceptional** events as potential problems to the EPA.* 
+:::
+
+```{r}
+# Qualifer codes from EPA website 
+qualifier_dictionary <-  read_csv(here("data", "raw", "qualifiers.csv")) %>% 
+  select(`Qualifier Code`, `Qualifier Description`) %>% 
+  clean_names()
+
+
+# Summary data supplied by EPA 
+all_events <- read_excel(here("data", "raw", "exceptional_events_1_1_2016_copy_for_MuckRock.xls")) %>% 
+  clean_names() %>% 
+  left_join(qualifier_dictionary, by = "qualifier_code")
+```
+
+### 699 exceptional events in the exceptional event database the EPA provided us with 
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(all_events, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+## Final agency actions in federal register 
+
+::: {.callout-note collapse="true"}
+## Sentences in copy
+- Findings: *A legal loophole has allowed the US Environmental Protection Agency to strike pollution from clean air tallies in more than 70 counties, enabling local regulators to claim the air was cleaner than it really was for **at least 21 million Americans**.*
+- Explainer: ***At least 21 million Americans** live in areas where an adjustment allowed local regulators to claim the area had met strict national health standards or that the air was cleaner than it actually was.*
+- Industry: *A review of federal data, as well as thousands of pages of regulatory records, shows that **at least 21 million people**, including in Michigan, now live and breathe in areas where the EPA has forgiven pollution from at least one "exceptional event," often a wildfire, since the law took effect.*
+:::
+
+### 22 million using 2022 Census population estimates 
+```{r}
+# For the code and census data, see ETL folder 
+fed_reg_current <- read_csv(here("data", "processed", "for_vis", "federal_register_areas_current.csv")) %>% 
+  select(-1)
+```
+
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(fed_reg_current, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+### 21 million using Census population estimates in the year the decisions were made 
+
+```{r}
+# For the code and census data, see ETL folder 
+fed_reg_historical <- read_csv(here("data", "processed", "for_vis", "federal_register_areas_historical.csv")) %>% 
+  select(-1)
+```
+
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(fed_reg_historical, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+
+## Blame demonstrations 
+
+::: {.callout-note collapse="true"}
+## Sentences in copy
+- *Findings: No state is blamed **more for smoke pollution than California**, followed by **Oregon and Canadian provinces**, according to the analysis. Western states are more likely to **point fingers at each other**, while states in the **Midwest and Northeast place the blame on Canadian provinces** like Alberta and Saskatchewan.*
+:::
+
+
+```{r}
+blame_demos <- read_csv(here("data", "processed", "for_vis", "demos_blamed.csv")) %>% 
+  select(-1)
+  
+blamed <- blame_demos %>% 
+  group_by(blamed) %>% 
+  summarize(num_times = sum(num_times))
+  
+```
+### States and who they blame 
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(blame_demos, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+### Which states are blamed most 
+- Almost all of Arizona and Mexico blames come from the outlier of Imperial County blaming those areas every time. Oregon and Alberta are blamed by a more varied amount of states 
+
+```{r}
+
+#| output: true
+#| column: page
+
+datatable(blamed, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+```
+## Growing use of EER 
+
+::: {.callout-note collapse="true"}
+- Findings: *Critics say the **growing use of the exceptional events rule** is of deep concern.*
+- Findings: *But over time, local regulators have **turned to exceptional events for wildfires more and more** often to reach air quality goals.*
+- Explainer: *turning to the exceptional events rule **for wildfires more and more often** to reach air quality goals*
+- Explainer: *The **increasing use of the rule**...*
+- Industry: *That wand is regularly, if quietly, being waved. An investigation from the California Newsroom, MuckRock and the Guardian found (LINK TO EXPLAINER) that state and local air quality managers across the US **increasingly rely on the rule** to meet air quality goals.* 
+- Solutions: *But these exceptional events are no longer exceptional, and **the requests to obscure them from air quality records** are more common too, according to an investigation from the Guardian, the California Newsroom, and MuckRock.*
+:::
+
+### All events by year, whether filed or not
+```{r}
+events_by_type_and_year <- aqs_df %>% 
+  group_by(event_type_description, year) %>% 
+  summarize(events = n_distinct(exceptional_event_id))
+```
+```{r}
+#| output: true
+ggplotly(ggplot(events_by_type_and_year, aes(x = year, y = events, fill = event_type_description)) + 
+  geom_bar(position="stack", stat = "identity") +
+  scale_x_continuous(breaks=min(events_by_type_and_year$year):max(events_by_type_and_year$year)))
+```
+### Flagged county days by year 
+
+
+```{r}
+county_days_by_type_and_year <- aqs_df %>% 
+  distinct(event_type_description, state_county_fips, date, year) %>% 
+  group_by(year, event_type_description) %>% 
+  summarize(days = n())
+```
+
+```{r}
+#| output: true
+ggplotly(ggplot(county_days_by_type_and_year, aes(x = year, y = days, fill = event_type_description)) + 
+  geom_bar(position="stack", stat = "identity") +
+  scale_x_continuous(breaks=min(county_days_by_type_and_year$year):max(county_days_by_type_and_year$year)))
+```
+
+### Concurred county days by year 
+
+
+```{r}
+concurred_county_days_by_type_and_year <- aqs_df %>% 
+  filter(concurrence_ind == "Y") %>% 
+  distinct(event_type_description, state_county_fips, date, year) %>% 
+  group_by(year, event_type_description) %>% 
+  summarize(days = n())
+```
+
+```{r}
+#| output: true
+ggplotly(ggplot(concurred_county_days_by_type_and_year, aes(x = year, y = days, fill = event_type_description)) + 
+  geom_bar(position="stack", stat = "identity") +
+  scale_x_continuous(breaks=min(concurred_county_days_by_type_and_year$year):max(concurred_county_days_by_type_and_year$year)))
+```
+
+
+
+
+
+
+
+

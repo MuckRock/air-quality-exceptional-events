@@ -85,6 +85,19 @@ for_concetration_plot <- rbind(mcmurray_concurrences, wayne_and_nevada_concurren
 
 # Exceptional events by days and type for High Winds and Wildfires
 
+
+## FIX USING CODE BELOW
+
+high_winds_v_wildfires <- aqs_df %>%
+  filter(event_type_description %in% c("Wildfire-U. S.", "Fire - Mexico/Central America.", "Fire - Canadian.", "High Winds.")) %>% 
+  mutate(event_type = case_when(event_type_description == "High Winds." ~ "High Winds", TRUE ~ "Wildfire")) %>% 
+  distinct(event_type, year, date, county) %>% 
+  group_by(event_type, year) %>% 
+  summarize(days = n()) %>% 
+  pivot_wider(names_from = event_type, values_from = days)
+
+## CODE ABOVE ^^ uses most recent EPA data to get around start/end date problems 
+
 all_events <- read_excel(here("data", "raw", "exceptional_events_1_1_2016_copy_for_MuckRock.xls")) %>% 
   clean_names() %>% 
   mutate(event_begin_date = dmy(event_begin_date)) %>% 

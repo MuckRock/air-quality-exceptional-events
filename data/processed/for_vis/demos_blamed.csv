@@ -1,0 +1,85 @@
+"","blamer","blamed","num_times"
+"1","arizona","california",2
+"2","california","arizona",16
+"3","california","mexico",13
+"4","california","nevada",3
+"5","california","washington",2
+"6","colorado","alberta",1
+"7","colorado","british columbia",1
+"8","colorado","california",1
+"9","colorado","idaho",1
+"10","colorado","montana",1
+"11","colorado","nunavut",1
+"12","colorado","oregon",1
+"13","colorado","saskatchewan",1
+"14","colorado","washington",1
+"15","colorado","wyoming",1
+"16","connecticut","alberta",1
+"17","idaho","alberta",1
+"18","idaho","british columbia",1
+"19","idaho","california",1
+"20","idaho","montana",1
+"21","idaho","oregon",2
+"22","idaho","washington",2
+"23","illinois","arizona",1
+"24","louisiana","california",1
+"25","louisiana","idaho",1
+"26","louisiana","montana",1
+"27","louisiana","oregon",1
+"28","louisiana","washington",1
+"29","maryland","alberta",2
+"30","maryland","british columbia",1
+"31","maryland","saskatchewan",1
+"32","massachusetts","alberta",1
+"33","michigan","alberta",1
+"34","michigan","british columbia",1
+"35","michigan","manitoba",1
+"36","michigan","saskatchewan",1
+"37","montana","arizona",1
+"38","montana","british columbia",2
+"39","montana","california",2
+"40","montana","colorado",1
+"41","montana","idaho",2
+"42","montana","nevada",1
+"43","montana","ontario",1
+"44","montana","oregon",2
+"45","montana","washington",2
+"46","nevada","arizona",1
+"47","nevada","california",18
+"48","nevada","colorado",2
+"49","nevada","idaho",1
+"50","nevada","mexico",2
+"51","nevada","oregon",3
+"52","nevada","pacific ocean",2
+"53","nevada","utah",3
+"54","new jersey","alberta",1
+"55","new mexico","mexico",1
+"56","new mexico","texas",1
+"57","ohio","alberta",1
+"58","ohio","arizona",1
+"59","oregon","california",3
+"60","pennsylvania","alberta",1
+"61","rhode island","alberta",1
+"62","texas","arizona",1
+"63","texas","california",1
+"64","texas","colorado",1
+"65","texas","mexico",1
+"66","texas","new mexico",1
+"67","utah","alberta",1
+"68","utah","british columbia",1
+"69","utah","california",1
+"70","utah","idaho",1
+"71","utah","montana",1
+"72","utah","nevada",1
+"73","utah","oregon",1
+"74","utah","washington",1
+"75","washington","california",1
+"76","washington","idaho",1
+"77","washington","montana",1
+"78","washington","oregon",1
+"79","wyoming","california",1
+"80","wyoming","colorado",1
+"81","wyoming","idaho",2
+"82","wyoming","montana",1
+"83","wyoming","oregon",1
+"84","wyoming","south dakota",1
