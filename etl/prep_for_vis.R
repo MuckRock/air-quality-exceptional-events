@@ -17,9 +17,9 @@ fips <- as.data.frame(fips_codes) %>%
   rename(state = state_name)
 
 # Load EPA data on all readings connected to exceptional events that the EPA has concurred on
-concurrences_and_non <- read_csv(here("data", "raw", "muckrock_request_exclusion_ee.csv")) %>% 
+concurrences_and_non <- read_excel(here("data", "raw", "muckrock_req_excl_ee_v2.xlsx")) %>% 
   clean_names() %>% 
-  mutate(date = as_date(sample_date_time)) %>% 
+  mutate(date = dmy(sample_date_time)) %>% 
   mutate(state_county_fips = str_remove(str_sub(airs_monitor_id, 1, 6), pattern= "-"))
 
 
@@ -57,23 +57,38 @@ write.csv(events_by_county, "data/processed/for_vis/events_by_county.csv")
 write.csv(events_by_state, "data/processed/for_vis/events_by_state.csv")
 
 
+
+
 # Concurred days for Fort McMurray fire in May 2016
 
-mcmurray_concurrences <- concurrences_and_non %>% 
-  filter(concurrence_ind == "Y") %>% 
-  filter(event_type_code == "RF") %>% 
-  filter(date >= "2016-05-01" & date <= "2016-06-01") %>% 
-  left_join(fips, by = "state_county_fips")
+#mcmurray_concurrences <- concurrences_and_non %>% 
+ # filter(concurrence_ind == "Y") %>% 
+ # filter(event_type_code == "RF") %>% 
+ # filter(date >= "2016-05-01" & date <= "2016-06-01") %>% 
+ # left_join(fips, by = "state_county_fips")
 
 wayne_and_nevada_concurrences <- concurrences_and_non %>%
   left_join(fips, by = "state_county_fips") %>% 
   filter(county %in% c("Wayne County", "Nevada County")) 
 
+sacramento_concurrences <- concurrences_and_non %>%
+  filter(concurrence_ind == "Y") %>% 
+  left_join(fips, by = "state_county_fips") %>% 
+  filter(county == "Sacramento County") %>% 
+  filter(airs_monitor_id == "06-067-0010-81102-4")
 
-write.csv(mcmurray_concurrences, "data/processed/for_vis/mcmurray_concurrences.csv")
+lane_concurrences <- concurrences_and_non %>%
+  filter(concurrence_ind == "Y") %>% 
+  left_join(fips, by = "state_county_fips") %>% 
+  filter(county == "Lane County") %>% 
+  filter(date > "2020-01-01") %>%
+  filter(pollutant_name == "PM10 Total 0-10um STP") %>% 
+  filter(airs_monitor_id == "41-039-2013-81102-1")
+
+  
 
 # Dataframe to help look up concentration plots and join later to mark concurred days 
-for_concetration_plot <- rbind(mcmurray_concurrences, wayne_and_nevada_concurrences) %>% 
+for_concetration_plot <- rbind(wayne_and_nevada_concurrences, lane_concurrences, sacramento_concurrences) %>% 
   distinct(airs_monitor_id, state, county, date) %>% 
   mutate(site_id = substr(gsub("-", "", airs_monitor_id), start = 1, stop = 9)) %>% 
   mutate(concurred = "Y")
@@ -122,25 +137,28 @@ wildfires_vs_high_winds <- all_events %>%
 write.csv(wildfires_vs_high_winds, "data/processed/for_vis/wildfires_vs_high_winds.csv")
 
 
-# Connecticut, Maryland, Massachusetts, New Jersey, Pennsylvania, Ohio and Rhode Island data for Ozone exceedences during McMurray fires
-file_names <- list.files("data/raw/concentration_plot/")
-index <- 1
-df <- data.frame(matrix(nrow = 0, ncol = length(cols)))
-for (file in file_names){
-  current_file <- file_names[index]
-  data <- read_csv(paste0("data/raw/concentration_plot/", current_file))
-  df <- rbind(df, data)
-  index <- index + 1 
-  
-}
 
-concentration_plot_df <-  df %>% 
+sacramento_pm <- read_csv("data/raw/concentration_plot/sacramento.csv")
+lane_pm <- read_csv("data/raw/concentration_plot/lane.csv")
+
+pm10_concentration_plot_df <- rbind(sacramento_pm, lane_pm) %>% 
+  clean_names() %>% 
+  select(date, site_id, daily_mean_pm10_concentration, state, county, site_longitude, site_latitude) %>% 
+  mutate(date = mdy(date)) %>% 
+  left_join(select(for_concetration_plot, c("site_id", "date", "concurred")), by = c("site_id", "date")) %>% 
+  mutate(concurred = case_when(is.na(concurred) ~ "N", TRUE ~ concurred))
+
+nevada_ozone <- read_csv("data/raw/concentration_plot/nevada.csv")
+wayne_ozone <- read_csv("data/raw/concentration_plot/wayne.csv")
+
+ozone_concentration_plot_df <-  rbind(nevada_ozone, wayne_ozone) %>%  
   clean_names %>% 
   select(date, site_id, daily_max_8_hour_ozone_concentration, state, county, site_longitude, site_latitude) %>% 
   mutate(date = mdy(date)) %>% 
   left_join(select(for_concetration_plot, c("site_id", "date", "concurred")), by = c("site_id", "date")) %>% 
   mutate(concurred = case_when(is.na(concurred) ~ "N", TRUE ~ concurred))
 
+write.csv(ozone_concentration_plot_df, "data/processed/for_vis/ozone_concentration_plot_df.csv")
 
 write.csv(concentration_plot_df, "data/processed/for_vis/concentration_plot_df.csv")
 

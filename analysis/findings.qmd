@@ -60,6 +60,14 @@ concurred_counties <- aqs_df %>%
 ```
 
 ```{r}
+concurred_counties_ids <- aqs_df %>%
+  filter(concurrence_ind == "Y") %>% 
+  distinct(exceptional_event_id, state_county_fips, county, state, event_begin_date, pollutant_name) %>% 
+  mutate(event_begin_date = dmy(event_begin_date))
+
+```
+
+```{r}
 #| output: true
 #| column: page
 datatable(concurred_counties, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
@@ -187,9 +195,10 @@ datatable(concurred_events, filter = 'top', class = 'cell-border stripe order-co
 ```{r}
 concurred_county_days_by_event_type <- aqs_df %>%
   filter(concurrence_ind == "Y") %>%
-  distinct(event_type_description, county, date) %>% 
+  distinct(event_type_description, county, state, date) %>% 
   group_by(event_type_description) %>% 
-  summarize(county_days = n())
+  summarize(days = n())
+
   
 concurred_event_type_comparison <- aqs_df %>%
   filter(concurrence_ind == "Y") %>% 
@@ -340,6 +349,7 @@ datatable(concurred_county_days_by_state, filter = 'top', class = 'cell-border s
 ## Sentences in copy
 - Solutions: *But **not a single prescribed fire** has been forgiven under the exceptional events rule since then.*
 - Explainer: *In **three-fourths of all days exceptional events were flagged**, local governments pointed at wildfires in justifying their requests.*
+- Findings: *...wildfire-related bad air days erased in counties nationwide is nearly double that for bad air days related to high winds, **236 compared to 121.***
 :::
 
 ### Concurred county-days by event type
