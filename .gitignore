@@ -54,3 +54,7 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+*.db
+*.db-shm
+*.db-wal

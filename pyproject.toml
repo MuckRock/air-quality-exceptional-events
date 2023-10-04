@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "air-quality-exceptional-events"
+version = "0.1.0"
+description = "Datasette instance for air quality exceptional events"
+authors = ["Chris Amico <eyeseast@gmail.com>", "Dillon Bergin <news.dillonbergin@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "air_quality_exceptional_events"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+datasette = "^0.64.4"
+sqlite-utils = "^3.35.1"
+datasette-cluster-map = "^0.17.2"
+
+[tool.poetry.group.dev.dependencies]
+ipython = "^8.16.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
