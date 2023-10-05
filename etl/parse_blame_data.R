@@ -37,8 +37,8 @@ blamed_long <- df %>%
   mutate(blamed = str_replace(blamed, "_", " ")) %>% 
   filter(!is.na(blamed)) %>% 
   filter(!state == blamed) %>% 
-  group_by(blamed, state) %>%
-  summarize(num = n()) 
+  group_by(blamed) %>%
+  summarize(num = n())
 
 # Export to csv for data vis 
 write.csv(blamers_long, here("data", "processed", "for_vis", "demos_blamed.csv"))
