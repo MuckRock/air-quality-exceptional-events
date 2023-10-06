@@ -768,7 +768,9 @@ datatable(county_days_by_month, filter = 'top', class = 'cell-border stripe orde
 highest_pm_for_wildfires <- information_flags %>% 
   filter(event_type_description == 	"Fire - Canadian.") %>% 
   filter(county %in% c("Philadelphia County", "Waukesha County")) %>% 
-  arrange(desc(sample_value))
+  filter(sample_value > 400) %>% 
+  arrange(desc(sample_value)) 
+  
 
 ```
 
