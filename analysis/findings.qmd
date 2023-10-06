@@ -704,7 +704,7 @@ county_days_by_state <- information_flags %>%
   filter(event_type_description == 	"Fire - Canadian.") %>% 
   distinct(state_county_fips, state, county, date) %>% 
   group_by(state) %>% 
-  summarize(days = n())
+  summarize(county_days = n())
   
   
 ```
@@ -738,7 +738,7 @@ county_days_by_month <- information_flags %>%
   mutate(month = month(date)) %>% 
   distinct(state_county_fips, date, month) %>% 
   group_by(month) %>% 
-  summarize(days = n())
+  summarize(county_days = n())
 
 ```
 
@@ -767,6 +767,7 @@ datatable(county_days_by_month, filter = 'top', class = 'cell-border stripe orde
 
 highest_pm_for_wildfires <- information_flags %>% 
   filter(event_type_description == 	"Fire - Canadian.") %>% 
+  filter(county %in% c("Philadelphia County", "Waukesha County")) %>% 
   arrange(desc(sample_value))
 
 ```
