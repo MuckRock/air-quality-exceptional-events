@@ -683,10 +683,8 @@ ggplotly(ggplot(concurred_county_days_by_type_and_year, aes(x = year, y = days, 
 ## Sentences in copy
 - Findings/solutions: *Last summer, **more than 20 states, from Alabama to Wyoming**, flagged air quality readings that were far higher than normal because of Canadian wildfires.*
  
-- Findings/solutions: *On the **evening of June 7, an EPA air quality monitor flagged in Philadelphia registered an hour of pollution at over 600 micrograms** of coarse particles per cubic meter. EPA refers to pollution this size as "inhalable," comparable to dust or pollen. Later in the month, on June 27, a monitor in Waukesha County, Wisconsin registered **an hour at over 450 micrograms**. These levels of pollution are considered hazardous by the EPA's Air Quality Index (AQI).
 
 
-- Findings/solutions: *These readings are **more than three times the EPA limit** that areas should not exceed much more than once a year. 
 
 :::
 
@@ -761,15 +759,22 @@ datatable(county_days_by_month, filter = 'top', class = 'cell-border stripe orde
 
 ```
 
-### Highest readings 
+### Monitors that went over 150 micrograms daily average
 
 ```{r}
 
 highest_pm_for_wildfires <- information_flags %>% 
-  filter(event_type_description == 	"Fire - Canadian.") %>% 
-  filter(county %in% c("Philadelphia County", "Waukesha County")) %>% 
-  filter(sample_value > 400) %>% 
-  arrange(desc(sample_value)) 
+  filter(event_type_description == 	"Fire - Canadian.") %>%
+  filter(pollutant_name == "PM10 Total 0-10um STP") %>% 
+  group_by(airs_monitor_id, date) %>% 
+  summarize(daily_mean = mean(sample_value), readings = n()) %>% 
+  filter(daily_mean > 150) %>% 
+  mutate(state_county_fips = str_remove(str_sub(airs_monitor_id, 1, 6), pattern= "-")) %>% 
+  left_join(fips, by = "state_county_fips")
+
+states_over <- ungroup(highest_pm_for_wildfires) %>% 
+  distinct(state)
+  
   
 
 ```
