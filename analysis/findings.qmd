@@ -498,7 +498,7 @@ datatable(all_events, filter = 'top', class = 'cell-border stripe order-column',
 ### 22 million using 2022 Census population estimates 
 ```{r}
 # For the code and census data, see ETL folder 
-fed_reg_current <- read_csv(here("data", "processed", "for_vis", "federal_register_areas_current.csv")) %>% 
+fed_reg_current <- read_csv(here("data", "processed", "federal_register_areas_current.csv")) %>% 
   select(-1)
 ```
 
@@ -528,7 +528,7 @@ datatable(fed_reg_current, filter = 'top', class = 'cell-border stripe order-col
 
 ```{r}
 # For the code and census data, see ETL folder 
-fed_reg_historical <- read_csv(here("data", "processed", "for_vis", "federal_register_areas_historical.csv")) %>% 
+fed_reg_historical <- read_csv(here("data", "processed", "federal_register_areas_historical.csv")) %>% 
   select(-1)
 ```
 
@@ -620,6 +620,7 @@ datatable(blamed, filter = 'top', class = 'cell-border stripe order-column', ext
 ## Growing use of EER 
 
 ::: {.callout-note collapse="true"}
+## Sentences in copy
 - Findings: *Critics say the **growing use of the exceptional events rule** is of deep concern.*
 - Findings: *But over time, local regulators have **turned to exceptional events for wildfires more and more** often to reach air quality goals.*
 - Explainer: *turning to the exceptional events rule **for wildfires more and more often** to reach air quality goals*
@@ -675,10 +676,116 @@ ggplotly(ggplot(concurred_county_days_by_type_and_year, aes(x = year, y = days, 
   scale_x_continuous(breaks=min(concurred_county_days_by_type_and_year$year):max(concurred_county_days_by_type_and_year$year)))
 ```
 
+## Informationally flagged data from this past summer
 
 
+::: {.callout-note collapse="true"}
+## Sentences in copy
+- Findings/solutions: *Last summer, **more than 20 states, from Alabama to Wyoming**, flagged air quality readings that were far higher than normal because of Canadian wildfires.*
+ 
+- Findings/solutions: *On the **evening of June 7, an EPA air quality monitor flagged in Philadelphia registered an hour of pollution at over 600 micrograms** of coarse particles per cubic meter. EPA refers to pollution this size as "inhalable," comparable to dust or pollen. Later in the month, on June 27, a monitor in Waukesha County, Wisconsin registered **an hour at over 450 micrograms**. These levels of pollution are considered hazardous by the EPA's Air Quality Index (AQI).
 
 
+- Findings/solutions: *These readings are **more than three times the EPA limit** that areas should not exceed much more than once a year. 
+
+:::
+
+### States that "information" flagged data from this past summer for Canadian wildfires 
 
 
+```{r}
+information_flags <- read_csv(here("data", "raw", "muckrock_informational_ee.csv")) %>% 
+  clean_names() %>% 
+  mutate(state_county_fips = str_remove(str_sub(airs_monitor_id, 1, 6), pattern= "-")) %>% 
+  left_join(fips, by = "state_county_fips") %>% 
+  mutate(date = date(sample_date_time))
 
+county_days_by_state <- information_flags %>% 
+  filter(event_type_description == 	"Fire - Canadian.") %>% 
+  distinct(state_county_fips, state, county, date) %>% 
+  group_by(state) %>% 
+  summarize(days = n())
+  
+  
+```
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(county_days_by_state, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+```
+
+
+### Most of the county-days flagged this summer came in June 
+
+```{r}
+
+county_days_by_month <- information_flags %>% 
+  filter(event_type_description == 	"Fire - Canadian.") %>% 
+  mutate(month = month(date)) %>% 
+  distinct(state_county_fips, date, month) %>% 
+  group_by(month) %>% 
+  summarize(days = n())
+
+```
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(county_days_by_month, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+```
+
+### Highest readings 
+
+```{r}
+
+highest_pm_for_wildfires <- information_flags %>% 
+  filter(event_type_description == 	"Fire - Canadian.") %>% 
+  arrange(desc(sample_value))
+
+```
+
+```{r}
+#| output: true
+#| column: page
+
+datatable(highest_pm_for_wildfires, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+```
