@@ -1,6 +1,6 @@
 # PROJECT SPECIFIC
-# Raw data files include large txt files of hundreds of thousands of air quality readings from EPA
-data/raw
+# Files too big for GitHub 
+data/raw/aqs_monitors.csv
 # Temp files include anything temporary analysis or data that won't make it into findings or reporting 
 temp/
 
