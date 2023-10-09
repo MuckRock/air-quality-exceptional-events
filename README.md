@@ -56,3 +56,6 @@ The most important trade-off is that this methodology underweights counties with
 ### Population impacted
 
 With the “final Agency actions” we analyzed from the [Federal Register](https://www.federalregister.gov/), we calculated the number of people those decisions impact. The [18 documents of final action]((https://www.documentcloud.org/projects/final-agency-actions-215474/)) that we found represent several different types of geographies: towns and cities, counties and core-based statistical areas. We reviewed each document to be sure that our geographic area aligned as closely with the EPA’s as possible, and when needed, erred on the conservative side, for example, by excluding counties the EPA defined as partially included in their ruling. [We then calculated the populations](etl/federal_register_pop_estimates_current.R) for these areas [using Census population estimates](data/processed/census) for both 2022 and the year the decision was made. In the end, we estimated more than 21 million people lived in this areas when the decisions were made and 22 million live there now, so we refer to this number as "more than 21 million."
+
+## Questions / Feedback
+Contact Dillon Bergin at dillon@muckrock.com
