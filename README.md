@@ -23,7 +23,7 @@ The [data we recieved](data/raw/muckrock_req_excl_ee_v2.csv) are air monitor rea
 
 ### Exceptional Events
 
-The EPA also provided us with [a dataset of exceptional events](data/raw/exceptional_events_1_1_2016_copy_for_MuckRock.xlsx). The relationship between this data and other data we received, the AQS data, is often called a one-to-many relationship in database language. That is, one exceptional event could include multiple readings over multiple days.
+The EPA also provided us with [a dataset of exceptional events](data/raw/exceptional_events_1_1_2016_copy_for_MuckRock.xls). The relationship between this data and other data we received, the AQS data, is often called a one-to-many relationship in database language. That is, one exceptional event could include multiple readings over multiple days.
 
 Each row in this data is an exceptional event with similar columns to the AQS data described above.
 
