@@ -37,7 +37,7 @@ To understand how often final agency actions happen and where, we reviewed 93 ru
 
 ### Events and demonstrations
 
-We count exceptional events as any event in the [exceptional events dataset](https://docs.google.com/spreadsheets/d/13AODNzQFGAAyaNCHSm7ROTk65_4_0FKU/edit?usp=drive_link&ouid=106876771194730767051&rtpof=true&sd=true). This data contains 699 events with a unique exceptional event ID.
+We count exceptional events as any event in the [exceptional events dataset](data/raw/exceptional_events_1_1_2016_copy_for_MuckRock.xls). This data contains 699 events with a unique exceptional event ID.
 
 A smaller subset of events later become "demonstrations," meaning the local air agency has both flagged the event and written a "demonstration" to the EPA to advocate that the EPA officially concur on excluding some or all of the data that the agency initially flagged. Demonstrations are the longform evidence, logic and analysis in a single document, usually over 100 pages, that the agency sends to the EPA to request exclusion of data for exceptional events. 
 
