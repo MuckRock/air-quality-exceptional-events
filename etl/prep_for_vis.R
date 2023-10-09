@@ -117,6 +117,7 @@ write.csv(ozone_concentration_plot_df, "data/processed/for_vis/ozone_concentrati
 write.csv(pm10_concentration_plot_df, "data/processed/for_vis/pm10_concentration_plot_df.csv")
 
 # Latitude and longitude for monitors with concurrences 
+# This aqs_monitors file is too big for Github and was gitignored, but can be found at https://aqs.epa.gov/aqsweb/airdata/download_files.html#Meta
 all_monitors <- read_csv(here("data", "raw", "aqs_monitors.csv")) %>% 
   clean_names() %>% 
   mutate(airs_monitor_id = paste(state_code, county_code, site_number, parameter_code, sep = "-")) %>% 
