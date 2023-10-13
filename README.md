@@ -49,7 +49,9 @@ Because the EPA doesn’t collect all these demonstrations in one place, nor con
 
 ### States and provinces blamed in demonstrations 
 
-We used the [138 demonstrations](https://www.documentcloud.org/projects/exceptional-event-demonstrations-215472/) that we recieved through [open-records requests](https://www.muckrock.com/project/air-quality-exceptions-1117/) to analyze which states were filing and who they blamed. We annotated the documents in DocumentCloud and then [scraped this metadata using a DocumentCloud Add-On](https://www.documentcloud.org/app?q=%2Buser%3Adillon-bergin-104081%20#add-ons/cam-garrison/documentcloud-metadata-grabber) Reporters Lindsasy Schachnow and  Holly J. McDede 
+We used the [138 demonstrations](https://www.documentcloud.org/projects/exceptional-event-demonstrations-215472/) that we recieved through [open-records requests](https://www.muckrock.com/project/air-quality-exceptions-1117/) to analyze which states were filing and who they blamed. We annotated the documents in DocumentCloud and then [scraped this metadata using a DocumentCloud Add-On](https://www.documentcloud.org/app?q=%2Buser%3Adillon-bergin-104081%20#add-ons/cam-garrison/documentcloud-metadata-grabber) 
+
+Reporters Lindsay Shachnow and Holly J. McDede reviewed and annotated all the demonstrations to make this possible. 
 
 ### County-days
 
