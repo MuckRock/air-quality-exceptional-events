@@ -6,7 +6,7 @@ You can find earlier work about wildfire pollution from MuckRock and the Califor
 
 ## Data
 
-All raw data can be found in [`data/raw`](data/raw), any data that involved manual work, like annotating documents, can be found in [`data/manual`](data/manual). The scripts to clean and organize this data can be found in [`etl`](etl) and the output of those scripts can be found in [`data/processed`](data/processed). Processed data is used for [`analysis`](data/analysis) and [`visualization`](data/processed/for_vis)
+All raw data can be found in [`data/raw`](data/raw), any data that involved manual work, like annotating documents, can be found in [`data/manual`](data/manual). The scripts to clean and organize this data can be found in [`etl`](etl) and the output of those scripts can be found in [`data/processed`](data/processed). Processed data is used for [`analysis`](data/analysis) and [`visualization`](data/processed/for_vis).
 
 ### EPA's Air Quality System
 
