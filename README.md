@@ -19,7 +19,9 @@ One year ago, we noticed a column in some of these publicly available datasets c
 ### AQS Readings
 Data on exceptional events and whether the EPA agreed to forgive them is hard to find in the EPA's AQS data. MuckRock, The California Newsroom and The Guardian negotiated a data request with the EPA to recieve this hard to find data, which includes variables and information mentioned in [the slides from both older](https://www.epa.gov/sites/default/files/2018-05/documents/webinar_on_exceptional_events_mitigation_plans_20180418_508.pdf) and [more recent presentations given by the EPA’s air quality department](https://cleanairact.org/wp-content/uploads/2022/05/Exceptional-Events-Program-Updates-Beth-Palma.pdf).
 
-The [data we recieved](data/raw/muckrock_req_excl_ee_v2.xlsx) are air monitor readings for all EPA air monitors across the country that were flagged for an exceedence caused by exceptional events. Each row has a monitor ID and a reading at that monitor, along with several columns that describe what the event was, when it was submitted and any text comments on the event.
+The [data we recieved](data/raw/muckrock_req_excl_ee_v2.xlsx) are air monitor readings for all EPA air monitors across the country that were flagged for an exceedence caused by exceptional events  from Jan. 1, 2016, to Jan. 31, 2022 — the most recent "request exclusion" [data the EPA could provide](https://www3.epa.gov/ttnairs1/airsaqsORIG/conference/AQSBasics_IntrotoRetrievals.pdf), as of September 2023. Each row has a monitor ID and a reading at that monitor, along with several columns that describe what the event was, when it was submitted and any text comments on the event. 
+
+Flagging data with a "request exclusion" flag in AQS is one of the first steps in exceptional events process, though agencies can also add an "informational" flag to data as well. We were able to recieve more recent [data that was informationally flagged](data/raw/muckrock_informational_ee.csv)
 
 ### Exceptional Events
 
