@@ -37,6 +37,8 @@ To understand how often final agency actions happen and where, we reviewed 93 ru
 
 ## Methodology
 
+We also consulted with five atmospheric scientists who have experience studying air pollution and its health impacts. As we received data and documents from the EPA, these experts helped shape our methodology. Once we finished our analysis, we shared our findings with them, to help validate and interpret the data. In collaboration with one of these experts, Dan Jaffe, a University of Washington-Bothell professor of atmospheric and environmental chemistry, we will present our work at the annual American Geophysical Union conference.
+
 ### Events and demonstrations
 
 We count exceptional events as any event in the [exceptional events dataset](data/raw/exceptional_events_1_1_2016_copy_for_MuckRock.xls). This data contains 699 events with a unique exceptional event ID.
@@ -55,7 +57,7 @@ We used the [138 demonstrations](https://www.documentcloud.org/projects/exceptio
 
 Because demonstrations and IDs are not a one-to-one match, we relied more on the amount of days submitted by air agencies than the amount of events. The EPA calls their decision to agree with a state or local air agency on what data to exclude from the record a “concurrence” and a rejection of that proposal a “nonconcurrence.” In [the AQS data](data/raw/muckrock_req_excl_ee_v2.xlsx), this is recorded in a column called `concurrence_indicator` with a value of either "Y" for yes and "N" for no. These indicators are added to hourly data by monitor.
 
-As journalists, we are interested in both counting the amount of air pollution excluded from the regulatory record and understanding how different areas of the country and different pollutants compare. To this end, we discussed methodologies with several atmosheric scientists and air pollution experts, and decided to measure EPA concurrences using a metric called county-days. For any single day in a county where there is a concurrence for any number of concurrence standards at any number of monitors, we counted one county-day.
+As journalists, we are interested in both counting the amount of air pollution excluded from the regulatory record and understanding how different areas of the country and different pollutants compare. To this end, we developed a metric called "county-days." For any single day in a county where there is a concurrence for any number of concurrence standards at any number of monitors, we counted one county-day.
 
 The most important trade-off is that this methodology underweights counties with more monitors where data was excluded while heavily weighting states with exceptional events that involve multiple counties. It also forgoes measuring exceptional events as single events, and highlights more clearly how much data was removed and where. Accordingly, this method makes comparing exceptional events and their impact on potential regulatory decisions easier to compare across counties and states. The EPA often, but not always, [measures attainment by county](https://www.epa.gov/green-book), so the number of days removed by county is a close proxy to the days that would cited in a regulatory decision based on the data. 
 
