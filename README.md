@@ -21,13 +21,13 @@ Data on exceptional events and whether the EPA agreed to forgive them is hard to
 
 The [data we recieved](data/raw/muckrock_req_excl_ee_v2.xlsx) are air monitor readings for all EPA air monitors across the country that were flagged for an exceedence caused by exceptional events  from Jan. 1, 2016, to Jan. 31, 2022 — the most recent "request exclusion" [data the EPA could provide](https://www3.epa.gov/ttnairs1/airsaqsORIG/conference/AQSBasics_IntrotoRetrievals.pdf), as of September 2023. Each row has a monitor ID and a reading at that monitor, along with several columns that describe what the event was, when it was submitted and any text comments on the event. 
 
-Flagging data with a "request exclusion" flag in AQS is one of the first steps in exceptional events process, though agencies can also add an "informational" flag to data as well. We were able to recieve more recent [data that was informationally flagged](data/raw/muckrock_informational_ee.csv)
+Flagging data with a "request exclusion" flag in AQS is one of the first steps in exceptional events process, though agencies can also add an "informational" flag to data as well. We were able to recieve more recent [data that was informationally flagged](data/raw/muckrock_informational_ee.csv) from May 1, 2023 to Aug. 31, 2023. As the name implies, these flags are not necessarily a step towards the exceptional events rule, but rather a note for the agency as they earmark data they may want to review later. 
 
 ### Exceptional Events
 
 The EPA also provided us with [a dataset of exceptional events](data/raw/exceptional_events_1_1_2016_copy_for_MuckRock.xls). The relationship between this data and other data we received, the AQS data, is often called a one-to-many relationship in database language. That is, one exceptional event could include multiple readings over multiple days.
 
-Each row in this data is an exceptional event with similar columns to the AQS data described above.
+Each row in this data is an exceptional event with similar columns to the AQS data described above. We requested that the EPA join the AQS data with the IDs in this exceptional events dataset so that we would have request exclusion flagged data that were ultimately tied to an exceptional event submission in a seperate system. Otherwise, a portion of the data would have included flags that agencies may not have pursued or submitted as exceptional events. 
 
 ### Final agency actions
 
