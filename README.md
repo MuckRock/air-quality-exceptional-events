@@ -21,7 +21,7 @@ Data on exceptional events and whether the EPA agreed to forgive them is hard to
 
 The [data we recieved](data/raw/muckrock_req_excl_ee_v2.xlsx) are air monitor readings for all EPA air monitors across the country that were flagged for an exceedence caused by exceptional events  from Jan. 1, 2016, to Jan. 31, 2022 — the most recent "request exclusion" [data the EPA could provide](https://www3.epa.gov/ttnairs1/airsaqsORIG/conference/AQSBasics_IntrotoRetrievals.pdf), as of September 2023. Each row has a monitor ID and a reading at that monitor, along with several columns that describe what the event was, when it was submitted and any text comments on the event. 
 
-Flagging data with a "request exclusion" flag in AQS is one of the first steps in exceptional events process, though agencies can also add an "informational" flag to data as well. We were able to recieve more recent [data that was informationally flagged](data/raw/muckrock_informational_ee.csv) from May 1, 2023 to Aug. 31, 2023. As the name implies, these flags are not necessarily a step towards the exceptional events rule, but rather a note for the agency as they earmark data they may want to review later. 
+Flagging data with a "request exclusion" flag in AQS is one of the first steps in the exceptional events process, though agencies can also add an "informational" flag to data as well. We were able to recieve more recent [data that was informationally flagged](data/raw/muckrock_informational_ee.csv) from May 1, 2023 to Aug. 31, 2023. As the name implies, these flags are not necessarily a step towards the exceptional events rule, but rather a note for the agency as they earmark data they may want to review later. 
 
 ### Exceptional Events
 
