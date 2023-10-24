@@ -138,12 +138,17 @@ write.csv(concurred_monitors, "data/processed/for_vis/concurred_monitors_with_la
 
 df <- read_excel(here("data", "raw", "muckrock_req_excl_ee_v2.xlsx")) %>% 
   clean_names() %>% 
-  mutate(date = as_date(sample_date_time)) %>% 
+  mutate(date = format(dmy(sample_date_time), format = "%m/%d/%Y")) %>% 
   mutate(state_county_fips = str_remove(str_sub(airs_monitor_id, 1, 6), pattern= "-"))
 
 df_fips_lat_longs <- df %>% 
   mutate(airs_monitor_id = str_sub(airs_monitor_id, end = 17)) %>% 
-  left_join(all_monitors, by = "airs_monitor_id")
+  left_join(all_monitors, by = "airs_monitor_id") %>% 
+  select(airs_monitor_id, local_site_name, agency_desc, state_name, county_name, date, sample_date_time,  
+         exceptional_event_id, event_type_code, event_begin_date, event_end_date, event_type_description, event_description, pollutant_name,
+         sample_value, sample_units, concurrence_ind, concurrence_date, concurrence_comment, naaqs_description, naaqs_statistic, naaqs_level,
+         latitude, longitude)
+         
 
-write_csv(df_fips_lat_longs, "for_chris_lookup.csv")
+write_csv(df_fips_lat_longs, "for_datasette.csv")
 
