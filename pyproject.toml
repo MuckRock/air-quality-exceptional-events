@@ -12,6 +12,7 @@ python = "^3.11"
 datasette = "^0.64.4"
 sqlite-utils = "^3.35.1"
 datasette-cluster-map = "^0.17.2"
+datasette-query-files = "^0.1.1"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.16.1"
