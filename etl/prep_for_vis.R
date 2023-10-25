@@ -138,7 +138,7 @@ write.csv(concurred_monitors, "data/processed/for_vis/concurred_monitors_with_la
 
 df <- read_excel(here("data", "raw", "muckrock_req_excl_ee_v2.xlsx")) %>% 
   clean_names() %>% 
-  mutate(date = format(dmy(sample_date_time), format = "%m/%d/%Y")) %>% 
+  mutate(date = as.character(format(dmy(sample_date_time), format = "%m/%d/%Y"))) %>% 
   mutate(state_county_fips = str_remove(str_sub(airs_monitor_id, 1, 6), pattern= "-"))
 
 df_fips_lat_longs <- df %>% 
@@ -150,5 +150,5 @@ df_fips_lat_longs <- df %>%
          latitude, longitude)
          
 
-write_csv(df_fips_lat_longs, "for_datasette.csv")
+write_csv(df_fips_lat_longs, "data/processed/for_datasette.csv")
 
