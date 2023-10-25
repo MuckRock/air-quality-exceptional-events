@@ -240,6 +240,23 @@ datasette = "*"
 test = ["pytest", "pytest-asyncio"]
 
 [[package]]
+name = "datasette-query-files"
+version = "0.1.1"
+description = "Write Datasette canned queries as plain SQL files"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "datasette-query-files-0.1.1.tar.gz", hash = "sha256:dfcd8880fb6b1126545a1fb21448e228963596ea877754527e7cb4edf95baad8"},
+    {file = "datasette_query_files-0.1.1-py3-none-any.whl", hash = "sha256:6521e38682668f257bae09f78c02837f0a6158124c5cc10c0a125deb3d28676b"},
+]
+
+[package.dependencies]
+datasette = "*"
+
+[package.extras]
+test = ["pytest", "pytest-asyncio"]
+
+[[package]]
 name = "decorator"
 version = "5.1.1"
 description = "Decorators for Humans"
@@ -937,4 +954,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "4f28c8295e3fe38375250f93ae4b22980dc6b221c8299f4e5a5254d3895bc9d0"
+content-hash = "c4cf687364d289ed0b859eae36c3a62bafeac7cd9e6fc10a1f58cfd664af2f64"

@@ -48,3 +48,7 @@ indexes:
 	$(SU) create-index $(DB) samples state_county_fips --if-not-exists
 	$(SU) create-index $(DB) samples state_name --if-not-exists
 	$(SU) create-index $(DB) samples county_name --if-not-exists
+
+views:
+	$(SU) create-view $(DB) concurred "select * from samples where concurrence_ind = 'Y'"
+	$(SU) create-view $(DB) denied "select * from samples where concurrence_ind = 'N'"
