@@ -1,6 +1,6 @@
 # build, run and deploy a datasette instance
 
-DB=airquality.db
+DB=epa-air-quality-exceptional-events.db
 LOOKUP_DATA=data/processed/for_datasette.csv
 
 # shortcut
@@ -27,13 +27,11 @@ $(DB):
 
 samples: $(DB) $(LOOKUP_DATA)
 	$(SU) insert $(DB) $@ $(LOOKUP_DATA) --csv --detect-types --truncate
+	$(SU) convert $(DB) $@ date 'r.parsedate(value, dayfirst=True, errors=r.IGNORE)'
 	$(SU) convert $(DB) $@ event_begin_date 'r.parsedate(value, errors=r.IGNORE)'
 	$(SU) convert $(DB) $@ event_end_date 'r.parsedate(value, errors=r.IGNORE)'
 	$(SU) convert $(DB) $@ sample_date_time 'r.parsedate(value, errors=r.IGNORE)'
 	$(SU) convert $(DB) $@ concurrence_date 'r.parsedate(value, errors=r.IGNORE)'
-	$(SU) convert $(DB) $@ date 'r.parsedate(value, errors=r.IGNORE)'
-	$(SU) transform $(DB) $@ --type state_county_fips text
-	$(SU) convert $(DB) $@ state_county_fips 'f"{int(value):05d}"'
 
 indexes:
 	# index likely facets
@@ -44,7 +42,6 @@ indexes:
 	$(SU) create-index $(DB) samples event_type_code --if-not-exists
 	$(SU) create-index $(DB) samples event_type_description --if-not-exists
 	$(SU) create-index $(DB) samples concurrence_ind --if-not-exists
-	$(SU) create-index $(DB) samples state_county_fips --if-not-exists
 	$(SU) create-index $(DB) samples state_name --if-not-exists
 	$(SU) create-index $(DB) samples county_name --if-not-exists
 
