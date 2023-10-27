@@ -8,6 +8,8 @@ You can find earlier work about wildfire pollution from MuckRock and the Califor
 
 All raw data can be found in [`data/raw`](data/raw), any data that involved manual work, like annotating documents, can be found in [`data/manual`](data/manual). The scripts to clean and organize this data can be found in [`etl`](etl) and the output of those scripts can be found in [`data/processed`](data/processed). Processed data is used for [`analysis`](data/analysis) and [`visualization`](data/processed/for_vis).
 
+We have also published the data in a more user-friendly way through [a tool called Datasette](https://datasette.io/). If you follow the the link to our [Datasette of exceptional events data](https://muckrock.datasette.cloud/epa-air-quality-exceptional-events/request_exclusion_flagged_hours_by_monitor), you will be able to see a map of all EPA monitors flagged for exceptional events. From there, you can toggle, or “facet,” to view the data by different categories and organize it, by state, type of event (Canadian or U.S. wildfire, high winds) or type of pollutant (particulate matter, ozone).
+
 ### EPA's Air Quality System
 
 The [EPA’s Air Quality System (AQS)](https://www.epa.gov/aqs) is a hub of the different types of air quality data the EPA collects across the country. These data are provided by the EPA in different forms for scientists and members of the public to analyze.
